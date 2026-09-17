@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EkoHesap — Ekokardiyografi Hesaplama Paneli</title>
+<style>
+:root{
+  --bg:#0c1118;
+  --panel:#131b26;
+  --panel2:#0f1620;
+  --line:#1e2a3a;
+  --ink:#e6edf5;
+  --muted:#7d8da0;
+  --accent:#34d6c4;
+  --accent2:#5b9dff;
+  --warn:#ffb347;
+  --danger:#ff6b7a;
+  --good:#4ade80;
+  --shadow:0 14px 40px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgba(52,214,196,.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, rgba(91,157,255,.07), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:"Georgia","Iowan Old Style",serif;
+  font-feature-settings:"liga" 1;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"SFMono-Regular",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace}
+header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(12,17,24,.82);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.head-in{max-width:1280px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:12px}
+.logo .mark{
+  width:44px;height:44px;border-radius:12px;
+  background:#0c1118;border:1px solid var(--line);padding:4px;
+  display:grid;place-items:center;
+  box-shadow:0 6px 18px rgba(52,214,196,.25);
+}
+.logo .mark svg{width:100%;height:100%}
+.logo h1{font-size:20px;letter-spacing:.5px;font-weight:600}
+.logo span{display:block;font-size:11px;color:var(--muted);font-family:monospace;letter-spacing:1px;text-transform:uppercase}
+.search{flex:1;min-width:200px;max-width:420px;margin-left:auto;position:relative}
+.search input{
+  width:100%;background:var(--panel2);border:1px solid var(--line);
+  color:var(--ink);padding:10px 14px 10px 38px;border-radius:10px;font-size:14px;font-family:monospace;
+}
+.search input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(52,214,196,.12)}
+.search svg{position:absolute;left:12px;top:11px;opacity:.5}
+.layout{max-width:1280px;margin:0 auto;padding:24px 22px 80px;display:grid;grid-template-columns:230px 1fr;gap:26px}
+nav.toc{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 110px);overflow-y:auto;padding-right:6px}
+nav.toc h4{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:monospace;margin:18px 0 8px;padding-left:6px}
+nav.toc h4:first-child{margin-top:0}
+nav.toc a{
+  display:block;padding:6px 10px;border-radius:7px;color:var(--muted);
+  text-decoration:none;font-size:13.5px;font-family:monospace;transition:.15s;
+}
+nav.toc a:hover{background:var(--panel);color:var(--ink)}
+.intro{margin-bottom:8px}
+.intro p{color:var(--muted);font-size:14.5px;max-width:760px}
+.section-title{
+  font-size:13px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);
+  font-family:monospace;margin:34px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;
+}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.card{
+  background:linear-gradient(180deg,var(--panel),var(--panel2));
+  border:1px solid var(--line);border-radius:14px;padding:20px;
+  box-shadow:var(--shadow);transition:.2s;position:relative;overflow:hidden;
+}
+.card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent)}
+.card:hover{border-color:#2c3e54;transform:translateY(-2px)}
+.card h3{font-size:17px;font-weight:600;margin-bottom:3px;letter-spacing:.3px}
+.card .sub{font-size:12px;color:var(--muted);font-family:monospace;margin-bottom:14px}
+.formula{
+  font-family:monospace;font-size:11.5px;color:var(--accent2);background:rgba(91,157,255,.07);
+  border-left:2px solid var(--accent2);padding:7px 10px;border-radius:0 6px 6px 0;margin-bottom:14px;
+  word-break:break-word;
+}
+.field{margin-bottom:11px}
+.field label{display:block;font-size:12.5px;color:var(--muted);font-family:monospace;margin-bottom:5px}
+.field .row{display:flex;align-items:center;gap:8px}
+.field input,.field select{
+  flex:1;width:100%;background:var(--bg);border:1px solid var(--line);color:var(--ink);
+  padding:9px 11px;border-radius:8px;font-size:14px;font-family:monospace;
+}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(52,214,196,.1)}
+.field .unit{font-size:11px;color:var(--muted);font-family:monospace;min-width:42px;text-align:right}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.result{
+  margin-top:14px;padding:14px;border-radius:10px;background:var(--bg);border:1px dashed var(--line);
+  min-height:54px;display:flex;flex-direction:column;justify-content:center;
+}
+.result .val{font-size:26px;font-family:monospace;font-weight:bold;color:var(--accent)}
+.result .val small{font-size:13px;color:var(--muted);font-weight:normal}
+.result .interp{font-size:13px;margin-top:5px;font-family:"Georgia",serif}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-family:monospace;font-weight:bold;margin-top:6px}
+.b-good{background:rgba(74,222,128,.15);color:var(--good)}
+.b-warn{background:rgba(255,179,71,.15);color:var(--warn)}
+.b-danger{background:rgba(255,107,122,.15);color:var(--danger)}
+.b-neutral{background:rgba(125,141,160,.15);color:var(--muted)}
+.placeholder{color:var(--muted);font-style:italic;font-size:13px;font-family:"Georgia",serif}
+.note{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5}
+.chart-box{margin-top:14px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px}
+.algo-step{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.algo-step:last-child{border:none}
+.algo-step .n{min-width:22px;height:22px;border-radius:6px;background:var(--accent);color:#06121a;display:grid;place-items:center;font-family:monospace;font-weight:bold;font-size:12px}
+.wide{grid-column:1/-1}
+footer{max-width:1280px;margin:0 auto;padding:30px 22px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;font-family:monospace}
+.hidden{display:none!important}
+table.matrix{width:100%;border-collapse:collapse;font-family:monospace;font-size:12px;margin-top:10px}
+table.matrix th,table.matrix td{border:1px solid var(--line);padding:6px 8px;text-align:center}
+table.matrix th{background:var(--panel2);color:var(--accent)}
+.toggle-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:11px}
+.toggle-row button{flex:1;background:var(--bg);border:1px solid var(--line);color:var(--muted);padding:7px;border-radius:7px;font-family:monospace;font-size:11.5px;cursor:pointer;transition:.15s}
+.toggle-row button.active{background:var(--accent);color:#06121a;border-color:var(--accent);font-weight:bold}
+@media(max-width:900px){.layout{grid-template-columns:1fr;padding:16px 14px 70px}nav.toc{display:none}.grid{grid-template-columns:1fr}.card{padding:16px}.two{grid-template-columns:1fr}.head-in{padding:12px 14px}.search{margin-left:0;max-width:none}}
+@media print{header,nav.toc,footer,.search{display:none}.layout{display:block;padding:0}.card{break-inside:avoid;box-shadow:none;background:#fff;color:#000;border-color:#bbb}.formula,.result{border-color:#bbb;background:#fff;color:#000}.result .val{color:#000}body{background:#fff;color:#000}}
+
+
+/* ===== White & Red clinical UI refresh ===== */
+:root{
+  --bg:#fff7f7;
+  --panel:#ffffff;
+  --panel2:#fff1f1;
+  --line:#f0c9c9;
+  --ink:#271214;
+  --muted:#7b5b5e;
+  --accent:#c9182b;
+  --accent2:#e64955;
+  --warn:#d97706;
+  --danger:#b00020;
+  --good:#15803d;
+  --shadow:0 18px 45px rgba(150,20,35,.13);
+}
+body{
+  background:
+    radial-gradient(900px 360px at 12% -5%, rgba(201,24,43,.10), transparent 60%),
+    linear-gradient(180deg,#fff,#fff7f7 45%,#ffffff);
+  color:var(--ink);
+  font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+header{
+  background:rgba(255,255,255,.88);
+  border-bottom:1px solid #f2d3d3;
+  box-shadow:0 10px 30px rgba(150,20,35,.08);
+}
+.logo .mark{
+  background:#0c1118;
+  box-shadow:0 10px 22px rgba(52,214,196,.22);
+}
+.logo h1{color:#24080b;font-weight:800;letter-spacing:.1px}
+.logo span{color:#9a5960;font-weight:700}
+.search input{
+  background:#fff;
+  border-color:#efc4c4;
+  color:#271214;
+  box-shadow:0 8px 20px rgba(201,24,43,.07);
+}
+.search input:focus{border-color:#c9182b;box-shadow:0 0 0 4px rgba(201,24,43,.12)}
+.layout{grid-template-columns:250px 1fr;gap:28px}
+nav.toc{
+  background:rgba(255,255,255,.78);
+  border:1px solid #f3cccc;
+  border-radius:18px;
+  padding:14px;
+  box-shadow:0 12px 28px rgba(150,20,35,.08);
+}
+nav.toc h4{color:#b10019;margin:12px 0 6px}
+nav.toc a{
+  color:#754a4f;
+  border:1px solid transparent;
+  margin-bottom:4px;
+  font-weight:650;
+}
+nav.toc a:hover,nav.toc a.active{
+  background:#fff0f1;
+  color:#b00020;
+  border-color:#f0b9be;
+}
+.toc-section-link{display:flex!important;justify-content:space-between;gap:8px;align-items:center}
+.toc-section-link span{font-size:11px;color:#c9182b}
+.intro{
+  background:linear-gradient(135deg,#ffffff,#fff0f1);
+  border:1px solid #f0c9c9;
+  border-radius:20px;
+  padding:22px 24px;
+  box-shadow:0 16px 40px rgba(150,20,35,.09);
+}
+.intro p{color:#68464a;font-size:15px;max-width:900px}
+.section-title{
+  width:100%;
+  border:1px solid #efc4c4;
+  background:linear-gradient(135deg,#fff,#fff1f1);
+  color:#991122;
+  border-radius:16px;
+  padding:16px 18px;
+  margin:24px 0 12px;
+  cursor:pointer;
+  box-shadow:0 12px 30px rgba(150,20,35,.09);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  text-align:left;
+  font-family:Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size:14px;
+  font-weight:850;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+  transition:.18s ease;
+}
+.section-title:hover{border-color:#d92d3d;transform:translateY(-1px);box-shadow:0 16px 36px rgba(150,20,35,.14)}
+.section-title .left{display:flex;align-items:center;gap:10px}
+.section-title .left::before{content:"";width:10px;height:28px;border-radius:8px;background:linear-gradient(180deg,#c9182b,#ff6b6b)}
+.section-title .count{margin-left:auto;font-size:12px;letter-spacing:0;text-transform:none;color:#986269;background:#fff;border:1px solid #f2c9cd;border-radius:999px;padding:5px 10px;font-weight:750}
+.section-title .chev{font-size:18px;color:#c9182b;transition:.18s ease;line-height:1}
+.calc-section:not(.collapsed) .section-title .chev{transform:rotate(180deg)}
+.accordion-panel{padding:2px 0 14px}
+.accordion-panel[hidden]{display:none!important}
+.grid{grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:18px}
+.card{
+  background:#ffffff;
+  border:1px solid #f1caca;
+  border-radius:18px;
+  box-shadow:0 16px 34px rgba(150,20,35,.10);
+}
+.card::before{height:4px;background:linear-gradient(90deg,#c9182b,#ff7676,#ffd2d2)}
+.card:hover{border-color:#df5a65;box-shadow:0 20px 42px rgba(150,20,35,.16)}
+.card h3{color:#271214;font-weight:800}
+.card .sub{color:#916166;font-weight:650}
+.formula{
+  color:#9b1020;
+  background:#fff2f3;
+  border-left:3px solid #c9182b;
+}
+.field label{color:#704e52;font-weight:750}
+.field input,.field select{
+  background:#fff;
+  border-color:#edc8cb;
+  color:#271214;
+}
+.field input:focus,.field select:focus{border-color:#c9182b;box-shadow:0 0 0 3px rgba(201,24,43,.10)}
+.field .unit{color:#8e6065}
+.result{
+  background:linear-gradient(180deg,#fff,#fff5f5);
+  border:1px dashed #e7acb2;
+}
+.result .val{color:#b00020}
+.result .interp{color:#442326;font-family:Inter, ui-sans-serif, system-ui, sans-serif}
+.placeholder{color:#8e6065;font-family:Inter, ui-sans-serif, system-ui, sans-serif}
+.b-good{background:rgba(21,128,61,.12);color:#15803d}
+.b-warn{background:rgba(217,119,6,.13);color:#b45309}
+.b-danger{background:rgba(176,0,32,.12);color:#b00020}
+.b-neutral{background:rgba(201,24,43,.10);color:#9b1020}
+.note{color:#81575c}
+table.matrix th{background:#fff1f1;color:#b00020}
+.toggle-row button{background:#fff;border-color:#edc8cb;color:#754a4f}
+.toggle-row button.active{background:#c9182b;border-color:#c9182b;color:#fff}
+footer{border-top:1px solid #f0c9c9;color:#7b5b5e;background:#fff}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav.toc{display:none}.grid{grid-template-columns:1fr}.section-title{font-size:13px;align-items:flex-start}.section-title .count{display:none}}
+@media print{header,nav.toc,.search{display:none!important}.layout{display:block;padding:0}.card{break-inside:avoid;box-shadow:none}.accordion-panel[hidden]{display:block!important}.section-title{box-shadow:none}}
+
+/* Kısaltmalar butonu & modal */
+.abbr-btn{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:12px;border:1px solid #e6b9bd;background:#fff;color:#b8323f;font-weight:600;font-size:13px;cursor:pointer;transition:.15s;white-space:nowrap}
+.abbr-btn:hover{border-color:#d92d3d;background:#fff5f5;transform:translateY(-1px);box-shadow:0 8px 20px rgba(150,20,35,.12)}
+.abbr-overlay{position:fixed;inset:0;background:rgba(30,10,12,.5);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.abbr-overlay.open{display:flex}
+.abbr-modal{background:#fff;border-radius:18px;max-width:720px;width:100%;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(80,10,20,.35);overflow:hidden}
+.abbr-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #f0dede}
+.abbr-head h2{margin:0;font-size:18px;color:#b8323f}
+.abbr-close{border:none;background:#f7eaea;color:#a33;width:34px;height:34px;border-radius:10px;font-size:20px;cursor:pointer;line-height:1;transition:.15s}
+.abbr-close:hover{background:#f0d0d0}
+.abbr-search{padding:14px 22px 6px}
+.abbr-search input{width:100%;padding:10px 14px;border:1px solid #e6cccc;border-radius:10px;font-size:14px;outline:none}
+.abbr-search input:focus{border-color:#d92d3d}
+.abbr-body{overflow-y:auto;padding:8px 22px 22px}
+.abbr-row{display:grid;grid-template-columns:110px 1fr;gap:12px;padding:9px 0;border-bottom:1px solid #f5eaea;align-items:baseline}
+.abbr-row:last-child{border-bottom:none}
+.abbr-row.hidden{display:none}
+.abbr-key{font-family:monospace;font-weight:700;color:#b8323f;font-size:14px}
+.abbr-val{color:#4a4145;font-size:14px;line-height:1.4}
+.abbr-empty{color:#999;padding:20px 0;text-align:center}
+@media(max-width:900px){.abbr-btn{padding:8px 12px;font-size:12px}.abbr-row{grid-template-columns:90px 1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-in">
+    <div class="logo">
+      <div class="mark">
+        <svg viewBox="0 0 200 200" width="100%" height="100%" aria-hidden="true" style="display:block">
+          <defs>
+            <linearGradient id="logoEkg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#34d6c4"/><stop offset="100%" stop-color="#5b9dff"/>
+            </linearGradient>
+            <clipPath id="logoHeart"><path d="M100 168 C40 120 20 80 20 54 C20 28 40 14 60 14 C78 14 92 24 100 40 C108 24 122 14 140 14 C160 14 180 28 180 54 C180 80 160 120 100 168 Z"/></clipPath>
+          </defs>
+          <path d="M100 168 C40 120 20 80 20 54 C20 28 40 14 60 14 C78 14 92 24 100 40 C108 24 122 14 140 14 C160 14 180 28 180 54 C180 80 160 120 100 168 Z" fill="none" stroke="url(#logoEkg)" stroke-width="14"/>
+          <g clip-path="url(#logoHeart)">
+            <path d="M26 92 L62 92 L74 64 L88 124 L102 80 L112 92 L174 92" fill="none" stroke="url(#logoEkg)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+        </svg>
+      </div>
+      <div><h1>EkoHesap</h1><span>Ekokardiyografi Hesaplama Paneli</span></div>
+    </div>
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="searchBox" placeholder="hesaplayıcı ara… (örn. AVA, TAPSE, LARS, GLS)">
+    </div>
+    <button type="button" class="abbr-btn" id="abbrBtn" aria-haspopup="dialog">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Kısaltmalar
+    </button>
+  </div>
+</header>
+
+<div class="abbr-overlay" id="abbrOverlay" role="dialog" aria-modal="true" aria-labelledby="abbrTitle">
+  <div class="abbr-modal">
+    <div class="abbr-head">
+      <h2 id="abbrTitle">Kısaltmalar</h2>
+      <button type="button" class="abbr-close" id="abbrClose" aria-label="Kapat">&times;</button>
+    </div>
+    <div class="abbr-search">
+      <input type="text" id="abbrSearch" placeholder="kısaltma veya açıklama ara…">
+    </div>
+    <div class="abbr-body" id="abbrBody"></div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="toc" id="toc"></nav>
+  <main>
+    <div class="intro">
+      <p>Klinik ekokardiyografi parametreleri için kapsamlı hesaplama paneli. Değerleri girin, sonuçlar ve kılavuz eşik yorumları anlık olarak hesaplanır. Tüm hesaplamalar tarayıcıda yapılır, veri kaydedilmez.</p>
+      <div class="note">Uyarı: Bu araç klinik karar desteği niteliğindedir; tek başına tanı, tedavi veya hasta yönetimi kararı için kullanılmamalıdır.</div>
+    </div>
+    <div id="content"></div>
+  </main>
+</div>
+
+<footer>
+  <div class="footer-note">
+    EkoHesap · Klinik karar desteği için yardımcı araç — kesin klinik karar yerine geçmez. Eşik değerleri ESC/ASE/EACVI kılavuzlarına dayanır. © 2026
+  </div>
+  <div class="footer-credits">
+    <span><strong>Yazılım Geliştirici:</strong> Halil SİNER · <a href="mailto:sinerhalil@outlook.com">sinerhalil@outlook.com</a></span>
+    <span><strong>Direktör:</strong> Mevlüt Serdar Kuyumcu · <a href="mailto:kuyumcuserdar@hotmail.com">kuyumcuserdar@hotmail.com</a></span>
+  </div>
+</footer>
+
+<script>
+/* ============ helpers ============ */
+const $=id=>document.getElementById(id);
+const num=id=>{const v=parseFloat($(id)?.value);return isNaN(v)?null:v;};
+const fmt=(v,d=2)=>v==null||isNaN(v)?"—":(Math.abs(v)>=1000?v.toFixed(0):v.toFixed(d));
+function setRes(id,html){const e=$(id);if(e)e.innerHTML=html;}
+function badge(t,cls){return `<span class="badge ${cls}">${t}</span>`;}
+function out(val,unit,interp,bcls,btext){
+  return `<div class="val">${val}<small> ${unit||''}</small></div>`+
+    (interp?`<div class="interp">${interp}</div>`:'')+
+    (btext?badge(btext,bcls):'');
+}
+const ph='<span class="placeholder">Değerleri girin…</span>';
+
+/* ============ calculator definitions ============ */
+/* Each: id, title, sub, formula, category, fields[], compute() */
+const CATS=[
+  {key:"anthro",name:"Antropometri & Temel",calcs:[]},
+  {key:"systolic",name:"Sistolik Fonksiyon & Deformasyon",calcs:[]},
+  {key:"vol",name:"Volüm & Kütle",calcs:[]},
+  {key:"la",name:"Sol Atriyum & Diyastolik İndeksler",calcs:[]},
+  {key:"flow",name:"Akım & Output",calcs:[]},
+  {key:"aortic",name:"Aort Kapak",calcs:[]},
+  {key:"mitral",name:"Mitral Kapak",calcs:[]},
+  {key:"regurg",name:"Yetersizlik (Regurjitan)",calcs:[]},
+  {key:"prosthesis",name:"Protez Kapak & PPM",calcs:[]},
+  {key:"rv",name:"Sağ Ventrikül & Pulmoner",calcs:[]},
+  {key:"dd",name:"Diyastolik Fonksiyon",calcs:[]},
+  {key:"pericard",name:"Perikard",calcs:[]},
+  {key:"risk",name:"Skorlar & Risk",calcs:[]},
+  {key:"shunt",name:"Şant & Hemodinami",calcs:[]},
+  {key:"stress",name:"Stres Eko",calcs:[]},
+];
+const reg={};CATS.forEach(c=>reg[c.key]=c);
+function add(cat,c){reg[cat].calcs.push(c);}
+
+/* ---------- VOLUME & MASS ---------- */
+add("vol",{id:"rwt",title:"Relative Wall Thickness (RWT)",sub:"Bağıl duvar kalınlığı",
+  formula:"RWT = (2 × PWd) / LVEDD",
+  fields:[["pwd","Posterior duvar diyastol sonu kalınlığı (PWd)","cm","0.9"],["lvedd_r","LV diyastol sonu çapı (LVEDD)","cm","4.8"]],
+  note:"LV geometrisinin sınıflandırılması için LV kitle indeksi ile birlikte değerlendirilmelidir.",
+  compute(){const p=num('pwd'),d=num('lvedd_r');if(p==null||d==null)return ph;const r=2*p/d;
+    let b,bt;if(r>0.42){b='b-warn';bt='Artmış RWT';}else{b='b-good';bt='Normal RWT';}
+    return out(fmt(r),'','',b,bt+' (eşik 0.42)');}});
+
+add("vol",{id:"lvmi",title:"LV Kütle İndeksi (LVMI)",sub:"Cube formülü (ASE)",
+  formula:"LVMI = {0.8×[1.04×((LVEDD+IVSd+PWd)³ − LVEDD³)] + 0.6} / BSA",
+  fields:[["lvedd_m","LVEDD","cm","4.8"],["ivsd_m","Septum diyastol (IVSd)","cm","0.9"],["pwd_m","Posterior duvar (PWd)","cm","0.9"],["bsa_m","BSA","m²","1.9"],["sex_m","Cinsiyet","sel","E|Erkek;K|Kadın"]],
+  compute(){const d=num('lvedd_m'),s=num('ivsd_m'),p=num('pwd_m'),bsa=num('bsa_m');const sex=$('sex_m').value;
+    if([d,s,p,bsa].some(x=>x==null))return ph;
+    const lvm=0.8*(1.04*(Math.pow(d+s+p,3)-Math.pow(d,3)))+0.6;
+    const idx=lvm/bsa;const up=sex==='K'?95:115;
+    let b,bt;if(idx>up){b='b-warn';bt='Artmış (LVH)';}else{b='b-good';bt='Normal';}
+    return out(fmt(idx),'g/m²',`LV kütle: ${fmt(lvm,1)} g · Normal eşikler: Erkek ≤115 g/m² · Kadın ≤95 g/m²`,b,bt);}});
+
+add("vol",{
+  id:"sv",
+  title:"Stroke Volume (SV)",
+  sub:"LVOT çapı ve VTI yöntemi",
+  formula:"SV = LVOT alanı × LVOT VTI ;  LVOT alanı = 0.785 × D²",
+  fields:[
+    ["lvot_d","LVOT çapı","cm","2.1"],
+    ["lvot_vti","LVOT VTI","cm","20"]
+  ],
+  compute(){
+    const d = num('lvot_d'),
+          v = num('lvot_vti');
+    if(d == null || v == null) return ph;
+
+    const area = 0.785 * d * d;
+    const sv = area * v;
+
+    let bt, b;
+    if (sv < 60) {
+      b = 'b-warn';
+      bt = 'Düşük';
+    } else if (sv <= 100) {
+      b = 'b-good';
+      bt = 'Normal';
+    } else {
+      b = 'b-neutral';
+      bt = 'Yüksek';
+    }
+
+    return out(
+      fmt(sv,1),
+      'mL',
+      `LVOT alanı: ${fmt(area,2)} cm²`,
+      b,
+      bt
+    );
+  }
+});
+
+add("vol",{id:"ci",title:"Cardiac Index (CI)",sub:"Kardiyak indeks",
+  formula:"CI = Cardiac Output / BSA",
+  fields:[["co_ci","Cardiac Output (CO)","L/dk","5.0"],["bsa_ci","BSA","m²","1.9"]],
+  compute(){const co=num('co_ci'),bsa=num('bsa_ci');if(co==null||bsa==null)return ph;
+    const ci=co/bsa;let b,bt;
+    if(ci<2.0){b='b-danger';bt='Kritik düşük';}else if(ci<2.5){b='b-warn';bt='Düşük';}else if(ci<=4.0){b='b-good';bt='Normal';}else{b='b-neutral';bt='Yüksek';}
+    return out(fmt(ci,2),'L/dk/m²','Normal: 2.5–4.0 L/dk/m²',b,bt);}});
+
+/* ---------- FLOW & OUTPUT ---------- */
+add("flow",{id:"co",title:"Cardiac Output (CO)",sub:"Kardiyak debi",
+  formula:"CO = (SV × HR) / 1000",
+  fields:[["sv_co","Stroke Volume (SV)","mL","75"],["hr_co","Kalp hızı (HR)","/dk","70"]],
+  note:"Vücut büyüklüğünden bağımsız değerlendirme için CI tercih edilmelidir.",
+  compute(){const sv=num('sv_co'),hr=num('hr_co');if(sv==null||hr==null)return ph;
+    const co=sv*hr/1000;let b,bt;
+    if(co<4){b='b-warn';bt='Düşük';}else if(co<=8){b='b-good';bt='Normal';}else{b='b-neutral';bt='Yüksek';}
+    return out(fmt(co,2),'L/dk','Normal: 4–8 L/dk',b,bt);}});
+
+add("flow",{id:"qpqs",title:"Qp/Qs (Şant Oranı)",sub:"Pulmoner/Sistemik akım oranı",
+  formula:"Qp/Qs = (RVOT_çapı²×RVOT_VTI) / (LVOT_çapı²×LVOT_VTI)",
+  fields:[["rvot_d_q","RVOT çapı","cm","2.4"],["rvot_vti_q","RVOT VTI","cm","16"],["lvot_d_q","LVOT çapı","cm","2.1"],["lvot_vti_q","LVOT VTI","cm","20"]],
+  compute(){const rd=num('rvot_d_q'),rv=num('rvot_vti_q'),ld=num('lvot_d_q'),lv=num('lvot_vti_q');
+    if([rd,rv,ld,lv].some(x=>x==null))return ph;
+    const qp=0.785*rd*rd*rv,qs=0.785*ld*ld*lv;const ratio=qp/qs;
+    let b,bt,interp;
+    if(ratio<1.5){b='b-good';bt='Anlamlı şant yok';interp='Qp/Qs <1.5 → Hemodinamik olarak anlamlı şant lehine değil';}
+    else{b='b-warn';bt='Anlamlı sol-sağ şant';interp='Qp/Qs ≥1.5 → Hemodinamik olarak anlamlı sol-sağ şant lehine';}
+    return out(fmt(ratio,2),':1',`Qp ${fmt(qp,1)} · Qs ${fmt(qs,1)} mL · ${interp}`,b,bt);}});
+
+add("flow",{id:"pvr",title:"Pulmoner Vasküler Direnç (PVR)",sub:"Ekokardiyografik tahmin (Abbas Formülü)",
+  formula:"PVR ≈ (TRV / RVOT_VTI) × 10 + 0.16   (Wood units)",
+  fields:[["trv_pvr","TR jet hızı (TRV)","m/s","2.8"],["rvot_vti_pvr","RVOT VTI","cm","18"]],
+  note:"Ekokardiyografik PVR yalnızca tahmini bir değerdir; kesin değerlendirme sağ kalp kateterizasyonu ile yapılmalıdır.",
+  compute(){const tr=num('trv_pvr'),vti=num('rvot_vti_pvr');if(tr==null||vti==null)return ph;
+    const pvr=(tr/vti)*10+0.16;let b,bt;
+    if(pvr<2){b='b-good';bt='Normal';}else if(pvr<3){b='b-warn';bt='Sınırda';}else{b='b-danger';bt='Yüksek (≥3 WU)';}
+    return out(fmt(pvr,2),'WU','· TRV/VTI>0.275 → Artmış PVR (>2 WU) lehine',b,bt);}});
+
+/* ---------- AORTIC ---------- */
+add("aortic",{id:"ava",title:"Aort Kapak Alanı (AVA)",sub:"Süreklilik denklemi",
+  formula:"AVA = (LVOT alanı × LVOT_VTI) / AV_VTI",
+  fields:[["lvot_d_a","LVOT çapı","cm","2.1"],["lvot_vti_a","LVOT VTI","cm","20"],["av_vti_a","Aortik VTI (AV)","cm","100"]],
+  note:"AVA, Vmax, MG, DVI,SVi ile birlikte değerlendirilmelidir.",
+  compute(){const d=num('lvot_d_a'),lv=num('lvot_vti_a'),av=num('av_vti_a');
+    if([d,lv,av].some(x=>x==null))return ph;
+    const area=0.785*d*d;const ava=area*lv/av;
+    let b,bt;if(ava>1.5){b='b-good';bt='Hafif AD';}else if(ava>=1.0){b='b-warn';bt='Orta AD';}else{b='b-danger';bt='Ciddi AD';}
+    return out(fmt(ava,2),'cm²',`LVOT alanı ${fmt(area,2)} cm² · >1.5: Hafif AD · 1.0–1.5: Orta AD · <1.0: Ciddi AD`,b,bt);}});
+
+add("aortic",{id:"dvi",title:"Dimensionless Index (DVI)",sub:"Boyutsuzluk indeksi",
+  formula:"DVI = LVOT_VTI / AV_VTI",
+  fields:[["lvot_vti_dvi","LVOT VTI","cm","20"],["av_vti_dvi","Aortik VTI (AV)","cm","100"]],
+  compute(){const lv=num('lvot_vti_dvi'),av=num('av_vti_dvi');if(lv==null||av==null)return ph;
+    const dvi=lv/av;let b,bt;
+    if(dvi>0.5){b='b-good';bt='Normal/Hafif';}else if(dvi>=0.25){b='b-warn';bt='Orta';}else{b='b-danger';bt='Ciddi AD (<0.25)';}
+    return out(fmt(dvi,2),'',`LVOT çapından bağımsızdır · Ciddi AD: DVI <0.25`,b,bt);}});
+
+add("aortic",{id:"zva",title:"Valvüloarteriyel İmpedans (Zva)",sub:"Global LV ard yükü",
+  formula:"Zva = (SBP + ortalama AV gradiyent) / SVi",
+  fields:[["sbp_z","Sistolik kan basıncı (SBP)","mmHg","130"],["mpg_z","Ortalama AV gradiyent","mmHg","40"],["svi_z","Stroke Volume İndeksi (SVi)","mL/m²","40"]],
+  compute(){const sbp=num('sbp_z'),mpg=num('mpg_z'),svi=num('svi_z');
+    if([sbp,mpg,svi].some(x=>x==null))return ph;
+    const z=(sbp+mpg)/svi;let b,bt;
+    if(z<3.5){b='b-good';bt='Normal';}else if(z<=5){b='b-warn';bt='Artmış ard yük';}else{b='b-danger';bt='Belirgin artmış ard yük';}
+    return out(fmt(z,2),'mmHg·mL⁻¹·m²','<3.5: Normal · 3.5–5.0: Artmış ard yük · >5.0: Belirgin artmış ard yük',b,bt);}});
+
+add("aortic",{id:"eli",title:"Energy Loss Index (ELI)",sub:"Enerji kaybı indeksi",
+  formula:"ELI = [(AVA × Aa) / (Aa − AVA)] / BSA   ; Aa = 0.785×D_asend²",
+  fields:[["ava_eli","AVA (efektif)","cm²","0.9"],["aod_eli","Asendan aort çapı (STJ)","cm","3.0"],["bsa_eli","BSA","m²","1.9"]],
+  compute(){const ava=num('ava_eli'),d=num('aod_eli'),bsa=num('bsa_eli');
+    if([ava,d,bsa].some(x=>x==null))return ph;
+    const aa=0.785*d*d;if(aa<=ava)return '<span class="placeholder">Aort alanı AVA\'dan büyük olmalı</span>';
+    const eli=((ava*aa)/(aa-ava))/bsa;
+    let b,bt;if(eli>0.60){b='b-good';bt='Ciddi AD değil';}else{b='b-danger';bt='Ciddi AD';}
+    return out(fmt(eli,2),'cm²/m²',`Asendan aort kesit alanı ${fmt(aa,2)} cm² · Pressure recovery ile düzeltilmiş efektif kapak alanı · >0.60: Ciddi AD lehine değil · ≤0.60: Ciddi AD lehine`,b,bt);}});
+
+/* ---------- MITRAL ---------- */
+add("mitral",{id:"mva_pht",title:"MVA — Pressure Half Time",sub:"Mitral kapak alanı (PHT)",
+  formula:"MVA = 220 / PHT",
+  fields:[["pht_m","Pressure Half Time (PHT)","ms","150"]],
+  note:"PHT yöntemi; orta-ileri MR, belirgin AR, perkütan mitral balon valvüloplasti sonrası ve değişmiş LA/LV kompliyansında güvenilir olmayabilir.",
+  compute(){const pht=num('pht_m');if(pht==null)return ph;
+    if(pht<=0)return '<span class="placeholder">PHT pozitif olmalı</span>';
+    const mva=220/pht;let b,bt;
+    if(mva>4.0){b='b-good';bt='Normal';}
+    else if(mva>2.5){b='b-good';bt='Hafif mitral darlığı';}
+    else if(mva>1.5){b='b-warn';bt='Orta mitral darlığı';}
+    else{b='b-danger';bt='Ciddi mitral darlığı';}
+    return out(fmt(mva,2),'cm²','>4.0cm²: Normal · 2.5–4.0cm²: Hafif · 1.5–2.5cm²: Orta · ≤1.5cm²: Ciddi mitral darlığı',b,bt);}});
+
+add("mitral",{id:"mva_ce",title:"MVA — Süreklilik Denklemi",sub:"Süreklilik denklemi yöntemi",
+  formula:"MVA = (LVOT alanı × LVOT_VTI) / MV_VTI",
+  fields:[["lvot_d_mv","LVOT çapı","cm","2.1"],["lvot_vti_mv","LVOT VTI","cm","20"],["mv_vti","Mitral VTI (MV)","cm","45"]],
+  compute(){const d=num('lvot_d_mv'),lv=num('lvot_vti_mv'),mv=num('mv_vti');
+    if([d,lv,mv].some(x=>x==null))return ph;
+    const area=0.785*d*d;const mva=area*lv/mv;
+    let b,bt;
+    if(mva>4.0){b='b-good';bt='Normal';}
+    else if(mva>2.5){b='b-good';bt='Hafif mitral darlığı';}
+    else if(mva>1.5){b='b-warn';bt='Orta mitral darlığı';}
+    else{b='b-danger';bt='Ciddi mitral darlığı';}
+    return out(fmt(mva,2),'cm²',`≥ Orta MR veya AR varlığında önerilmez · LVOT alanı ${fmt(area,2)} cm² · >4.0: Normal · 2.5–4.0: Hafif · 1.5–2.5: Orta · ≤1.5: Ciddi`,b,bt);}});
+
+add("mitral",{id:"wilkins",title:"Wilkins Skoru",sub:"Perkütan mitral balon valvülotomi uygunluğu",
+  formula:"Toplam = Leaflet hareketi + Kalınlaşma + Kalsifikasyon + Subvalvüler (her biri 1–4)",
+  fields:[["w1","Yaprakçık hareketi","sel","1|1-Hafif kısıtlı;2|2-Orta Derece kısıtlı;3|3-Belirgin kısıtlı;4|4-Minimal hareket"],
+    ["w2","Yaprakçık kalınlaşması","sel","1|1-Normal (4-5mm);2|2-Orta derecede kalınlaşma (5–8 mm) ;3|3-Belirgin kalınlaşma (8–10 mm) ;4|4-Yaygın kalınlaşma (>10 mm) "],
+    ["w3","Kalsifikasyon","sel","1|1-Tek bir kalsifikasyon alanı ;2|2-Dağınık kalsifikasyon alanları ;3|3-Yaprakçık orta kesimine uzanan kalsifikasyon ;4|4-Yaygın ve yoğun kalsifikasyon "],
+    ["w4","Subvalvüler tutulum","sel","1|1-Minimal;2|2-Kordaların proksimal 1/3'ünde tutulum ;3|3-Kordaların distal 1/3'üne uzanan tutulum ;4|4-Yaygın fibrotik tutulum "]],
+  compute(){const a=parseInt($('w1').value),b1=parseInt($('w2').value),c=parseInt($('w3').value),d=parseInt($('w4').value);
+    const t=a+b1+c+d;let b,bt;
+    if(t<=8){b='b-good';bt='PMBV için uygun';}else if(t<=11){b='b-warn';bt='Sınırda uygunluk';}else{b='b-danger';bt='PMBV için uygun değil';}
+    return out(t,'/16',`≤8: PMBV için uygun · 9–11: Sınırda uygunluk · >11: PMBV için uygun değil`,b,bt);}});
+
+/* ---------- REGURGITATION ---------- */
+add("regurg",{id:"eroa",title:"EROA (PISA)",sub:"Efektif regurjitan orifis alanı",
+  formula:"Flow = 2π×r²×Va ; EROA = Flow / V_reg",
+  fields:[["eroa_valve","Yöntem","sel","mr|Mitral Yetersizliği;ar|Aort Yetersizliği"],["pisa_r","PISA yarıçapı (r)","cm","0.7"],["aliasV","Aliasing hızı (Va)","cm/s","40"],["vreg","Reg. jet pik hızı (V_reg)","cm/s","500"]],
+  note:"Sekonder MR'da EROA tek başına değerlendirilmemeli; diğer kantitatif parametrelerle birlikte yorumlanmalıdır.",
+  compute(){const valve=$('eroa_valve').value,r=num('pisa_r'),va=num('aliasV'),v=num('vreg');
+    if([r,va,v].some(x=>x==null))return ph;
+    const flow=2*Math.PI*r*r*va;const eroa=flow/v;
+    let b,bt,interp;
+    if(valve==='mr'){
+      if(eroa<0.20){b='b-good';bt='Hafif MR';}else if(eroa<0.40){b='b-warn';bt='Orta MR';}else{b='b-danger';bt='Ciddi MR';}
+      interp='Primer MR: <0.20 Hafif · 0.20–0.39 Orta · ≥0.40 Ciddi';
+    }else{
+      if(eroa<0.10){b='b-good';bt='Hafif AR';}else if(eroa<0.30){b='b-warn';bt='Orta AR';}else{b='b-danger';bt='Ciddi AR';}
+      interp='AR: <0.10 Hafif · 0.10–0.29 Orta · ≥0.30 cm² Ciddi';
+    }
+    return out(fmt(eroa,3),'cm²',`Pik flow ${fmt(flow,0)} mL/s · ${interp}`,b,bt);}});
+
+add("regurg",{id:"rvol",title:"Regurjitan Volüm (R Vol)",sub:"PISA yöntemi",
+  formula:"R Vol = EROA × Reg_VTI",
+  fields:[["rvol_valve","Yöntem","sel","mr|Mitral Yetersizliği;ar|Aort Yetersizliği"],["eroa_rv","EROA","cm²","0.35"],["reg_vti","Regurjitan jet VTI","cm","120"]],
+  compute(){const valve=$('rvol_valve').value,e=num('eroa_rv'),vti=num('reg_vti');if(e==null||vti==null)return ph;
+    const rv=e*vti;let b,bt;
+    if(rv<30){b='b-good';bt=valve==='ar'?'Hafif AR':'Hafif MR';}else if(rv<60){b='b-warn';bt=valve==='ar'?'Orta AR':'Orta MR';}else{b='b-danger';bt=valve==='ar'?'Ciddi AR':'Ciddi MR';}
+    return out(fmt(rv,1),'mL','Primer MR:<30 mL: Hafif  ·  30–59 mL: Orta  ·  ≥60 mL: Ciddi regürjitasyon',b,bt);}});
+
+add("regurg",{id:"rf",title:"Regurjitan Fraksiyon (RF)",sub:"Volümetrik yöntem",
+  formula:"RF = (R Vol / Total SV) × 100",
+  fields:[["rf_valve","Kapak","sel","mitral|Mitral;aort|Aort"],
+    ["rvol_rf","Regurjitan Volüm (R Vol)","mL","55"],
+    ["fsv_rf","Net ileri akım SV","mL","70"]
+  ],
+  compute(){const valve=$('rf_valve').value,rv=num('rvol_rf'),fsv=num('fsv_rf');
+    if(rv==null||fsv==null)return ph;
+    const total=rv+fsv;const rf=rv/total*100;
+    const isAort=valve==='aort';const lbl=isAort?'aort':'mitral';
+    let b,bt;
+    if(rf<30){b='b-good';bt=`Hafif ${lbl} regürjitasyonu`;}
+    else if(rf<50){b='b-warn';bt=`Orta ${lbl} regürjitasyonu`;}
+    else{b='b-danger';bt=`Ciddi ${lbl} regürjitasyonu`;}
+    return out(fmt(rf,1),'%',`Total SV ${fmt(total,0)} mL · ${isAort?'Aort':'Mitral'} · <30%: Hafif · 30–49%: Orta · ≥50%: Ciddi`,b,bt);}});
+
+/* ---------- RV & PULMONARY ---------- */
+add("rv",{id:"rvfac",title:"RV FAC",sub:"Fraksiyonel alan değişimi",
+  formula:"FAC = [(EDA − ESA) / EDA] × 100",
+  fields:[["eda","RV diyastolİK alanı (EDA)","cm²","20"],["esa","RV sistolİK alanı (ESA)","cm²","11"]],
+  compute(){const ed=num('eda'),es=num('esa');if(ed==null||es==null)return ph;
+    const fac=(ed-es)/ed*100;let b,bt;
+    if(fac>=35){b='b-good';bt='Korunmuş RV sistolik fonksiyonu';}else{b='b-danger';bt='Azalmış (RV disfonk.)';}
+    return out(fmt(fac,1),'%','Korunmuş RV sistolik fonksiyon: ≥35%',b,bt);}});
+
+add("rv",{id:"tapse_spap",title:"TAPSE/sPAP",sub:"RV-PA Coupling",
+  formula:"Oran = TAPSE / sPAP   ; sPAP ≈ 4×TRV² + RAP",
+  fields:[["tapse","TAPSE","mm","18"],["spap","sPAP (sistolik PAB)","mmHg","45"]],
+  compute(){const t=num('tapse'),s=num('spap');if(t==null||s==null)return ph;
+    const r=t/s;let b,bt;
+    if(r>=0.36){b='b-good';bt='Korunmuş RV-PA coupling';}else if(r>=0.31){b='b-warn';bt='Sınırda RV-PA coupling';}else{b='b-danger';bt='RV-PA uncoupling';}
+    return out(fmt(r,3),'mm/mmHg','Korunmuş ≥0.36 · Sınırda 0.31–0.35 · Uncoupling <0.31',b,bt);}});
+
+
+
+add("rv",{id:"pac",title:"Pulmoner Arter Komplians (PAC)",sub:"PA kompliyansı",
+  formula:"PAC = SV / (sPAP − dPAP)",
+  fields:[["sv_pac","Atım Hacmi (SV)","mL","75"],["spap_pac","sistolik PAB (sPAP)","mmHg","45"],["dpap_pac","diyastolik PAB (dPAP)","mmHg","18"]],
+  compute(){const sv=num('sv_pac'),s=num('spap_pac'),d=num('dpap_pac');
+    if([sv,s,d].some(x=>x==null))return ph;
+    if(s<=d)return '<span class="placeholder">sPAP > dPAP olmalı</span>';
+    const pac=sv/(s-d);let b,bt;
+    if(pac>=3){b='b-good';bt='Normal';}else if(pac>=1.5){b='b-warn';bt='Azalmış';}else{b='b-danger';bt='Düşük (kötü prognoz)';}
+    return out(fmt(pac,2),'mL/mmHg','Normal: ~3–7 mL/mmHg',b,bt);}});
+
+add("rv",{id:"tpg",title:"Transpulmoner Gradiyent (TPG)",sub:"Pulmoner hemodinamik değerlendirme",
+  formula:"TPG = mPAP − PCWP",
+  fields:[["mpap_tpg","Ortalama PAB (mPAP)","mmHg","30"],["pcwp_tpg","PCWP (wedge)","mmHg","12"]],
+  compute(){const m=num('mpap_tpg'),p=num('pcwp_tpg');if(m==null||p==null)return ph;
+    const tpg=m-p;let b,bt;
+    if(tpg<12){b='b-good';bt='Normal/Pasif';}else{b='b-warn';bt='Yüksek (>12)';}
+    return out(fmt(tpg,0),'mmHg','TPG >12 mmHg → prekapiller komponent 2022 ESC/ERS Kılavuzunda terk edildi; ayrım PVR>2 WU  ile yapılıyor',b,bt);}});
+
+add("rv",{id:"dpg",title:"Diyastolik Basınç Gradiyenti (DPG)",sub:"Pulmoner hemodinamik değerlendirme",
+  formula:"DPG = dPAP − PCWP",
+  fields:[["dpap_dpg","diyastolik PAB (dPAP)","mmHg","18"],["pcwp_dpg","PCWP (wedge)","mmHg","12"]],
+  compute(){const d=num('dpap_dpg'),p=num('pcwp_dpg');if(d==null||p==null)return ph;
+    const dpg=d-p;let b,bt;
+    if(dpg<7){b='b-good';bt='İzole post-kapiller';}else{b='b-danger';bt='Kombine (≥7)';}
+    return out(fmt(dpg,0),'mmHg','DPG ≥7 mmHg → kombine post/prekapiller PH 2022 ESC/ERS Kılavuzunda terk edildi; ayrım PVR>2 WU  ile yapılıyor',b,bt);}});
+
+
+add("rv",{id:"sci",title:"Sol Ventrikül Eksantrisite İndeksi (EI)",sub:"Septal düzleşme — RV basınç/volüm yükü",
+  formula:"Eccentricity Index = D2 (septuma dik LV çapı) / D1 (septuma paralel LV çapı)",
+  fields:[["d2_sci","D2 — Septuma dik LV çapı","cm","4.5"],["d1_sci","D1 — Septuma paralel LV çapı","cm","4.0"]],
+  note:"PSAX (mid-papiller kas düzeyi) sistol ve/veya diyastolde ölçülür. Sistolik EI >1.1 basınç yükünü, yalnız diyastolik EI >1.1 ise volüm yükünü düşündürür.",
+  compute(){const d2=num('d2_sci'),d1=num('d1_sci');if(d2==null||d1==null)return ph;
+    const ei=d2/d1;let b,bt;
+    if(ei<=1.1){b='b-good';bt='Normal septal geometri';}else{b='b-warn';bt='Septal düzleşme (LV D-şekli)';}
+    return out(fmt(ei,2),'',`EI: Normal ≤1.1 · Septal düzleşme (LV D-şekli) >1.1`,b,bt);}});
+
+
+
+/* ---------- SCORES & RISK ---------- */
+add("risk",{id:"pascal",title:"Rope Skoru & PASCAL sınıflaması",sub:"PFO ile ilişkili inme olasılığının değerlendirilmesi",
+  formula:"RoPE = Yaş, vasküler risk faktörleri ve infarkt paternine dayalı puanlama ; PASCAL = RoPE skoru ve yüksek riskli PFO anatomisine dayalı sınıflama",
+  fields:[["rope_age","Yaş grubu","sel","5|18–29 yaş;4|30–39 yaş;3|40–49 yaş;2|50–59 yaş;1|60–69 yaş;0|≥70 yaş"],
+    ["rope_htn","Hipertansiyon","sel","1|Yok (+1);0|Var (+0)"],
+    ["rope_dm","Diyabet","sel","1|Yok (+1);0|Var (+0)"],
+    ["rope_stroke","Önceki inme/TIA","sel","1|Yok (+1);0|Var (+0)"],
+    ["rope_smoke","Sigara kullanımı","sel","1|Yok (+1);0|Var (+0)"],
+    ["rope_cortical","Görüntülemede kortikal infarkt","sel","1|Var (+1);0|Yok (+0)"],
+    ["pfo_feat","Yüksek riskli PFO özelliği","sel","1|Var: geniş şant ve/veya atriyal septal anevrizma;0|Yok"]],
+  compute(){
+    const age=parseInt($('rope_age').value),htn=parseInt($('rope_htn').value),dm=parseInt($('rope_dm').value),
+      prev=parseInt($('rope_stroke').value),smoke=parseInt($('rope_smoke').value),cort=parseInt($('rope_cortical').value),
+      feat=parseInt($('pfo_feat').value);
+    const rope=age+htn+dm+prev+smoke+cort;
+    const ropeHigh=rope>=7, highRisk=feat===1;
+    let cls,b,bt;
+    if(ropeHigh && highRisk){cls='Probable';b='b-good';bt='PFO ilişkisi güçlü';}
+    else if(!ropeHigh && !highRisk){cls='Unlikely';b='b-danger';bt='PFO ilişkisi zayıf';}
+    else{cls='Possible';b='b-warn';bt='PFO ilişkisi mümkün';}
+    const ropeBand=rope>=7?'yüksek':(rope>=4?'orta':'düşük');
+    const parts=[`Yaş ${age}`,`HT ${htn}`,`DM ${dm}`,`önceki inme/TIA ${prev}`,`sigara ${smoke}`,`kortikal infarkt ${cort}`];
+    return out(cls,'',`Otomatik RoPE: <b>${rope}/10</b> (${ropeBand} olasılık)<br>${parts.join(' + ')}<br>Yüksek riskli PFO özelliği: <b>${highRisk?'var':'yok'}</b><br>PASCAL sınıfı: <b>${cls}</b>`,b,bt);}});
+
+add("risk",{id:"triscore",title:"TRISCORE",sub:"İzole triküspit kapak cerrahisinde hastane içi mortalite riski",
+  formula:"8 değişken: yaş, NYHA, RV disfonk., sağ KY bulguları, yüksek doz diüretik, eGFR, bilirubin, LVEF",
+  fields:[["ts_age","Yaş ≥70","sel","1|Evet;0|Hayır"],["ts_nyha","NYHA III–IV","sel","1|Evet;0|Hayır"],
+    ["ts_rkf","Sağ KY bulguları","sel","2|Evet;0|Hayır"],["ts_diur","Yüksek doz diüretik","sel","2|Evet;0|Hayır"],
+    ["ts_gfr","GFR <30","sel","2|Evet;0|Hayır"],["ts_bili","Total bilirubin yüksek","sel","2|Evet (1.2 mg/dL / > Normal Üst Sınır);0|Normal"],
+    ["ts_lvef","LVEF <60","sel","1|Evet;0|Hayır"],["ts_rvd","RV disfonksiyon","sel","1|Evet;0|Hayır"]],
+  compute(){const ids=['ts_age','ts_nyha','ts_rkf','ts_diur','ts_gfr','ts_bili','ts_lvef','ts_rvd'];
+    const t=ids.reduce((s,i)=>s+parseInt($(i).value),0);
+    let b,bt;if(t<=3){b='b-good';bt='Düşük risk';}else if(t<=5){b='b-warn';bt='Orta risk';}else{b='b-danger';bt='Yüksek risk';}
+    return out(t,'/12',`Yüksek skor → artmış hastane içi mortalite riski. ${bt}`,b,bt);}});
+
+/* ---------- STRESS ECHO ---------- */
+add("stress",{id:"dse",title:"Düşük Doz Dobutamin Stres Eko (AD)",sub:"Düşük akım-düşük gradiyentli ciddi AD değerlendirmesi",
+  formula:"Baseline -5–10–20 µg/kg/dk dobutamin. AVA, ortalama gradiyent ve SV yanıtı değerlendirilir.",
+  fields:[["dse_ava_b","Bazal AVA","cm²","0.8"],["dse_ava_p","Pik AVA","cm²","0.95"],
+    ["dse_mg_b","Bazal ort. gradiyent","mmHg","25"],["dse_mg_p","Pik ort. gradiyent","mmHg","45"],
+    ["dse_sv_b","Bazal SV","mL","45"],["dse_sv_p","Pik SV","mL","60"]],
+  compute(){const ab=num('dse_ava_b'),ap=num('dse_ava_p'),mb=num('dse_mg_b'),mp=num('dse_mg_p'),sb=num('dse_sv_b'),sp=num('dse_sv_p');
+    if([ab,ap,mb,mp,sb,sp].some(x=>x==null))return ph;
+    const flowReserve=(sp-sb)/sb*100;
+    const hasReserve=flowReserve>=20;
+    let cls,b,bt,interp;
+    if(ap<=1.0 && mp>=40){cls='Gerçek ciddi AD';b='b-danger';bt='True severe AS';
+      interp='Pik AVA ≤1.0 cm² ve ort. gradiyent ≥40 mmHg → gerçek ciddi darlık.';}
+    else if(ap>1.0){cls='Psödo-ciddi AD';b='b-warn';bt='Pseudo-severe AS';
+      interp='Akım artışıyla AVA >1.0 cm² → psödo-ciddi; öncelikle medikal tedavi.';}
+    else{cls='Belirsiz';b='b-neutral';bt='Indeterminate';interp='Net sınıflama yapılamadı; AVC kalsiyum skoru ile destekleyin.';}
+    const reserveTxt=hasReserve?`Akım rezervi VAR (ΔSV ${fmt(flowReserve,0)}% ≥20%)`:`Akım rezervi YOK (ΔSV ${fmt(flowReserve,0)}% <20%) — düşük rezerv kötü prognoz`;
+    return out(cls,'',`${reserveTxt}<br>${interp}`,b,bt);}});
+
+/* ====================================================== */
+/* ============ EK HESAPLAYICILAR ======================= */
+/* ====================================================== */
+
+/* ---------- ANTHROPOMETRY & BASIC ---------- */
+add("anthro",{id:"bsa",title:"Vücut Yüzey Alanı (BSA)",sub:"Mosteller & DuBois Formülleri",
+  formula:"Mosteller = √(boy×kilo/3600) ; DuBois = 0.007184×boy^0.725×kilo^0.425",
+  fields:[["bsa_h","Boy","cm","170"],["bsa_w","Kilo","kg","75"]],
+  compute(){const h=num('bsa_h'),w=num('bsa_w');if(h==null||w==null)return ph;
+    if(h<=0||w<=0)return '<span class="placeholder">Boy ve kilo pozitif olmalı</span>';
+    const m=Math.sqrt(h*w/3600);const db=0.007184*Math.pow(h,0.725)*Math.pow(w,0.425);
+    return out(fmt(m,2),'m²',`Mosteller: ${fmt(m,2)} · DuBois: ${fmt(db,2)} m² · İndeksleme için Mosteller BSA önerilir`,'b-neutral','BSA');}});
+
+add("anthro",{id:"map",title:"Ortalama Arter Basınç (MAP)",sub:"Sistemik organ perfüzyonunun göstergesi",
+  formula:"MAP = DBP + (SBP − DBP)/3",
+  fields:[["map_s","Sistolik (SBP)","mmHg","120"],["map_d","Diyastolik (DBP)","mmHg","80"]],
+  compute(){const s=num('map_s'),d=num('map_d');if(s==null||d==null)return ph;
+    if(s<=d)return '<span class="placeholder">SBP, DBP’den büyük olmalı</span>';
+    const map=d+(s-d)/3;let b,bt;
+    if(map<70){b='b-danger';bt='Düşük';}else if(map<=100){b='b-good';bt='Normal';}else{b='b-warn';bt='Yüksek';}
+    return out(fmt(map,0),'mmHg','MAP≥65 mmHg: Organ perfüzyonu genellikle yeterlidir.',b,bt);}});
+
+/* ---------- SYSTOLIC FUNCTION & DEFORMATION ---------- */
+add("systolic",{id:"ef_simpson",title:"LVEF — Modifiye Simpson",sub:"Biplan disk yöntemi)",
+  formula:"%LVEF = [(LVEDV − LVESV) / LVEDV] × 100",
+  fields:[["edv_s","LV diyastol sonu hacmi (LVEDV)","mL","120"],["esv_s","LV sistol sonu hacmi (LVESV)","mL","50"]],
+  compute(){const ed=num('edv_s'),es=num('esv_s');if(ed==null||es==null)return ph;
+    if(es>=ed)return '<span class="placeholder">LVEDV > LVESV olmalı</span>';
+    const ef=(ed-es)/ed*100;const sv=ed-es;let b,bt;
+    if(ef>=50){b='b-good';bt='Korunmuş';}else if(ef>=41){b='b-warn';bt='Hafif azalmış';}else if(ef>=30){b='b-danger';bt='Orta azalmış';}else{b='b-danger';bt='Ciddi azalmış';}
+    return out('%'+fmt(ef,1),'',`SV ${fmt(sv,0)} mL · HFrEF <%40 · HFmrEF %40–49 · HFpEF ≥%50`,b,bt);}});
+
+add("systolic",{id:"fs",title:"Fraksiyonel Kısalma (FS)",sub:"M-mode sol ventrikül lineer kısalma fraksiyonu",
+  formula:"FS = [(LVEDD − LVESD) / LVEDD] × 100",
+  fields:[["fs_d","LV diyastol sonu çapı (LVEDD)","cm","4.8"],["fs_s","LV sistol sonu çapı (LVESD)","cm","3.0"]],
+  compute(){const d=num('fs_d'),s=num('fs_s');if(d==null||s==null)return ph;
+    if(s>=d)return '<span class="placeholder">LVEDD > LVESD olmalı</span>';
+    const fs=(d-s)/d*100;let b,bt;
+    if(fs>=25){b='b-good';bt='Normal';}else{b='b-danger';bt='Azalmış';}
+    return out('%'+fmt(fs,1),'','Normal: ≥ %25',b,bt);}});
+
+add("systolic",{id:"dpdt",title:"LV dP/dt",sub:"MR jetinden hesaplanan LV dP/dt",
+  formula:"dP/dt = 32 / Δt   (1→3 m/s arası süre, saniye)",
+  fields:[["dpdt_t","MR jeti 1→3 m/s süresi (Δt)","ms","30"]],
+  compute(){const t=num('dpdt_t');if(t==null)return ph;
+    const dpdt=32/(t/1000);let b,bt;
+    if(dpdt>1200){b='b-good';bt='Normal';}else if(dpdt>=800){b='b-warn';bt='Hafif–orta azalmış';}else{b='b-danger';bt='Belirgin azalmış';}
+    return out(fmt(dpdt,0),'mmHg/sn','Normal: >1200 mmHg/sn · <800 mmHg/sn: Belirgin azalmış LV sistolik fonksiyonu',b,bt);}});
+
+add("systolic",{id:"mapse",title:"MAPSE",sub:"Mitral anüler düzlem sistolik hareketi",
+  formula:"M-mode ile septal/lateral mitral anülüsün longitudinal sistolik yer değiştirmesi",
+  fields:[["mapse_v","MAPSE (ort.)","mm","13"]],
+  compute(){const v=num('mapse_v');if(v==null)return ph;let b,bt;
+    if(v>=11){b='b-good';bt='Normal';}else if(v>=9){b='b-warn';bt='Hafif azalmış';}else if(v>=7){b='b-warn';bt='Orta derecede azalmış';}else{b='b-danger';bt='Belirgin azalmış';}
+    return out(fmt(v,1),'mm','Normal: ≥11 mm · LV longitudinal sistolik fonksiyonu yansıtır.',b,bt);}});
+
+add("systolic",{id:"tds",title:"TDI S' (Sistolik Doku Hızı)",sub:"Longitudinal sistolik fonksiyon",
+  formula:"Doku Doppler ile mitral anülüs pik sistolik hızı (s')",
+  fields:[["tds_loc","Konum","sel","sep|Septal;lat|Lateral"],["tds_v","S' hızı","cm/sn","9"]],
+  compute(){const loc=$('tds_loc').value,v=num('tds_v');if(v==null)return ph;
+    const thr=loc==='lat'?10:7;let b,bt;
+    if(v>=thr){b='b-good';bt='Normal';}else{b='b-danger';bt='Azalmış';}
+    return out(fmt(v,1),'cm/sn',`${loc==='lat'?'Lateral':'Septal'} s′ Normal: ≥${thr} cm/sn ·  Yaş ve cinsiyete göre değişebilir`,b,bt);}});
+
+add("systolic",{id:"gls",title:"Left Ventricular Global Longitudinal Strain (LV GLS)",sub:"Speckle-tracking deformasyon analizi",
+  formula:"LV GLS = Sol ventrikül ortalama longitudinal pik sistolik strain (negatif değer)",
+  fields:[["gls_v","LV GLS","%","-20"]],
+  compute(){const v=num('gls_v');if(v==null)return ph;const a=Math.abs(v);let b,bt;
+    if(a>=18){b='b-good';bt='Normal';}else if(a>=16){b='b-warn';bt='Sınırda';}else{b='b-danger';bt='Azalmış';}
+    return out(fmt(v,1),'%',`GLS Normal: ≤ −18.0 % · Subklinik disfonksiyonda erken bozulur`,b,bt);}});
+
+add("systolic",{id:"tei_pw",title:"Miyokardiyal Performans İndeksi (Tei) — Pulsed Doppler",sub:"Global ventrikül fonksiyonu",
+  formula:"MPI = (IVCT + IVRT) / ET = (a − b) / b",
+  fields:[["teipw_a","a (MV kapanış→açılış aralığı)","ms","450"],["teipw_b","b (ejeksiyon zamanı, ET)","ms","290"]],
+  compute(){const a=num('teipw_a'),b1=num('teipw_b');if(a==null||b1==null)return ph;
+    if(b1<=0||a<=b1)return '<span class="placeholder">a > b olmalı</span>';
+    const mpi=(a-b1)/b1;let b,bt;
+    if(mpi<=0.40){b='b-good';bt='Normal MPI ';}else{b='b-warn';bt='Artmış MPI';}
+    return out(fmt(mpi,2),'','Pulsed Doppler MPI (LV): Normal ≤0.40 · ↑ = global disfonksiyon',b,bt);}});
+
+add("systolic",{id:"tei_tdi",title:"Miyokardiyal Performans İndeksi (Tei) — Tissue Doppler",sub:"Global ventrikül fonksiyonu",
+  formula:"MPI = (IVCT + IVRT) / ET = (a − b) / b",
+  fields:[["teitdi_a","a (TDI kapanış→açılış aralığı)","ms","450"],["teitdi_b","b (ejeksiyon zamanı, ET)","ms","290"]],
+  compute(){const a=num('teitdi_a'),b1=num('teitdi_b');if(a==null||b1==null)return ph;
+    if(b1<=0||a<=b1)return '<span class="placeholder">a > b olmalı</span>';
+    const mpi=(a-b1)/b1;let b,bt;
+    if(mpi<=0.55){b='b-good';bt='Normal MPI';}else{b='b-warn';bt='Artmış MPI';}
+    return out(fmt(mpi,2),'','Tissue Doppler MPI (LV): Normal ≤0.55 · ↑ = global disfonksiyon',b,bt);}});
+
+    add("vol",{id:"svi",title:"Stroke Volume İndeksi (SVi)",sub:"İndekslenmiş atım hacmi",
+  formula:"SVi = SV / BSA",
+  fields:[["svi_sv","Stroke Volume (SV)","mL","75"],["svi_bsa","BSA","m²","1.9"]],
+  compute(){const sv=num('svi_sv'),bsa=num('svi_bsa');if(sv==null||bsa==null)return ph;
+    const svi=sv/bsa;let b,bt;
+    if(svi<35){b='b-danger';bt='Düşük akım (<35)';}else{b='b-good';bt='Normal';}
+    return out(fmt(svi,1),'mL/m²','SVI <35 mL/m² → Düşük akım',b,bt);}});
+
+/* ---------- LEFT ATRIUM ---------- */
+add("la",{id:"lavi",title:"LA Volüm İndeksi (LAVi)",sub:"Biplane Simpson / Alan-Uzunluk yöntemi",
+  formula:"LAVi = LA Volüm / BSA",
+  fields:[["lavi_v","LA Volümü","mL","55"],["lavi_bsa","BSA","m²","1.9"]],
+  compute(){const v=num('lavi_v'),bsa=num('lavi_bsa');if(v==null||bsa==null)return ph;
+    const lavi=v/bsa;let b,bt;
+    if(lavi<=34){b='b-good';bt='Normal';}else if(lavi<=41){b='b-warn';bt='Hafif dilate';}else if(lavi<=48){b='b-warn';bt='Orta dilate';}else{b='b-danger';bt='Ciddi dilate';}
+    return out(fmt(lavi,1),'mL/m²',' ·Normal: ≤34 mL/m² · Kronik yüksek LV doluş basıncı göstergesi ',b,bt);}});
+
+add("la",{id:"lars",title:"LA Rezervuar Strain (LARS)",sub:"Sol atriyum rezervuar fonksiyonu",
+  formula:"LARS = Sol atriyum rezervuar fazındaki pik longitudinal strain (%)",
+  fields:[["lars_v","LA rezervuar strain (LARS)","%","28"],["lars_rhythm","Ritim","sel","sinus|Sinüs ritmi;af|Atriyal fibrilasyon"],["lars_lavi","LAVi (opsiyonel)","mL/m²","34"],["lars_ee","E/e' (opsiyonel)","","12"]],
+  compute(){const v=num('lars_v'),lavi=num('lars_lavi'),ee=num('lars_ee');const rhythm=$('lars_rhythm').value;
+    if(v==null)return ph;
+    const a=Math.abs(v);let b,bt,interp;
+    if(a>=24){b='b-good';bt='Korunmuş';interp='LA rezervuar fonksiyonu korunmuş. Kronik dolum basıncı artışı lehine güçlü ek bulgu yok.';}
+    else if(a>=18){b='b-warn';bt='Sınırda / hafif azalmış';interp='Sınırda veya hafif azalmış LARS. Diyastolik parametreler, LAVi ve klinik bağlamla birlikte yorumlanmalı.';}
+    else{b='b-danger';bt='Belirgin azalmış';interp='Belirgin düşük LARS; artmış LV dolum basıncı, LA miyopatisi veya AF substratı lehine olabilir.';}
+    const rhythmTxt=rhythm==='af'?'AF ritminde ölçüm döngü ortalamasıyla yapılmalı; eşikler sinüs ritmine göre daha değişkendir.':'Sinüs ritminde ölçüm için uygundur.';
+    const addTxt=[];
+    if(lavi!=null){addTxt.push(lavi>34?`LAVi ${fmt(lavi,1)} mL/m²: dilatasyon eşlik ediyor`:`LAVi ${fmt(lavi,1)} mL/m²: normal/sınırda`);}
+    if(ee!=null){addTxt.push(ee>14?`E/e' ${fmt(ee,1)}: yüksek dolum basıncı lehine`:`E/e' ${fmt(ee,1)}: belirgin yüksek değil`);}
+    return out(fmt(a,1),'%',`${interp}<br>${rhythmTxt}${addTxt.length?'<br>'+addTxt.join(' · '):''}`,b,bt);}});
+
+add("la",{id:"ea",title:"E/A Oranı",sub:"Mitral doluş akım paterni",
+  formula:"E/A = erken (E) / atriyal (A) doluş pik hızı",
+  fields:[["ea_e","Mitral E hızı","cm/s","80"],["ea_a","Mitral A hızı","cm/s","60"]],
+  compute(){const e=num('ea_e'),a=num('ea_a');if(e==null||a==null)return ph;
+    const r=e/a;let b,bt,interp;
+    if(r<=0.8){b='b-warn';bt='Bozulmuş relaksasyon paterni';interp='E/A ≤0.8 → Bozulmuş relaksasyon (Grade I) lehine; diğer diyastolik parametrelerle birlikte değerlendirilmelidir.';}
+    else if(r<2){b='b-warn';bt='Normal/psödonormal doluş paterni';interp='E/A >0.8–<2.0 → Normal veya psödonormal doluş paterni;diğer diyastolik parametrelerle birlikte değerlendirilmelidir .';}
+    else{b='b-danger';bt='Restriktif doluş paterni';interp='E/A ≥2.0 → Restriktif doluş paterni; artmış LAP ve Grade III lehine.';}
+    return out(fmt(r,2),'',interp,b,bt);}});
+
+add("la",{id:"ee",title:"E/e' Oranı",sub:"LV doluş basıncının noninvaziv göstergesi",
+  formula:"E/e' = mitral E / TDI e' (ortalama)",
+  fields:[["ee_e","E hızı","cm/s","80"],["ee_eprime","e' (ortalama)","cm/s","8"]],
+  compute(){const e=num('ee_e'),ep=num('ee_eprime');if(e==null||ep==null)return ph;
+    const r=e/ep;let b,bt;
+    if(r<=14){b='b-good';bt='Normal E/e′';}else{b='b-danger';bt='Artmış LV doluş basıncı lehine';}
+    return out(fmt(r,1),'',(r<=14?'≤14: Normal LV doluş basıncı lehine':'>14: Artmış LV doluş basıncı lehine'),b,bt);}});
+
+add("la",{id:"pvsd",title:"Pulmoner Ven Akımı S/D Oranı",sub:"Pulmoner ven akım paterni",
+  formula:"S/D = sistolik (S) / diyastolik (D) ileri akım pik hızı",
+  fields:[["pv_s","S dalga hızı","cm/s","50"],["pv_d","D dalga hızı","cm/s","40"]],
+  compute(){const s=num('pv_s'),d=num('pv_d');if(s==null||d==null)return ph;
+    const r=s/d;let b,bt;
+    if(r>=1){b='b-good';bt='S baskın (Normal LAP lehine)';}else{b='b-warn';bt='D baskın (Artmış LAP lehine)';}
+    return out(fmt(r,2),'',(r>=1?'S/D ≥1: S baskın (Normal LAP lehine)':'S/D <1: D baskın (Artmış LAP lehine)'),b,bt);}});
+
+/* ---------- AORTIC additions ---------- */
+add("aortic",{id:"meangrad",title:"Pik Aort Transvalvüler Hız (Vmax) ve Pik Basınç Gradiyenti (PG)",sub:"Basitleştirilmiş Bernoulli denklemi",
+  formula:"ΔP = 4 × Vmax²",
+  fields:[["bern_v","Pik transvalvüler hız (Vmax)","m/sn","4.0"]],
+  note:"Vmax ≤2.5 m/sn: Kapak morfolojisi ve diğer ekokardiyografik bulgularla birlikte değerlendirilmelidir.",
+  compute(){const v=num('bern_v');if(v==null)return ph;
+    const pg=4*v*v;let b,bt;
+    if(v<=2.5){b='b-good';bt='Normal / Aort sklerozu';}
+    else if(v<3.0){b='b-good';bt='Hafif';}
+    else if(v<4.0){b='b-warn';bt='Orta';}
+    else{b='b-danger';bt='Ciddi (≥4.0 m/sn)';}
+    return out(fmt(pg,0),'mmHg',`Vmax ${fmt(v,1)} m/sn · Pik gradiyent · Vmax'a göre: Normal/Skleroz ≤2.5 · Hafif 2.5–2.9 · Orta 3.0–3.9 · Ciddi ≥4.0 m/sn`,b,bt);}});
+
+add("aortic",{id:"avai",title:"İndekslenmiş AVA (AVAi)",sub:"Vücut yüzey alanına göre düzeltme",
+  formula:"AVAi = AVA / BSA",
+  fields:[["avai_a","AVA","cm²","0.9"],["avai_bsa","BSA","m²","1.9"]],
+  compute(){const a=num('avai_a'),bsa=num('avai_bsa');if(a==null||bsa==null)return ph;
+    const avai=a/bsa;let b,bt;
+    if(avai>0.85){b='b-good';bt='Hafif';}else if(avai>0.6){b='b-warn';bt='Orta';}else{b='b-danger';bt='Ciddi (<0.6)';}
+    return out(fmt(avai,2),'cm²/m²','Ciddi AD: ≤0.6 cm²/m² (özellikle çok küçük ve büyük BSA"da  )',b,bt);}});
+
+/* ---------- PROSTHESIS & PPM ---------- */
+add("prosthesis",{id:"ppm",title:"Prosthesis-Patient Mismatch (PPM)",sub:"Protez-hasta uyumsuzluğu",
+  formula:"iEOA = Protez EOA / BSA",
+  fields:[["ppm_eoa","Protez EOA","cm²","1.4"],["ppm_bsa","BSA","m²","1.9"],["ppm_pos","Pozisyon","sel","ao|Aortik;mi|Mitral"],["ppm_bmi","BMI","sel","lo|<30 kg/m²;hi|≥30 kg/m²"]],
+  compute(){const eoa=num('ppm_eoa'),bsa=num('ppm_bsa'),pos=$('ppm_pos').value,bmi=$('ppm_bmi').value;
+    if(eoa==null||bsa==null)return ph;
+    const ieoa=eoa/bsa;let b,bt,interp;
+    if(pos==='ao'){
+      if(bmi==='lo'){
+        if(ieoa>0.85){b='b-good';bt='PPM yok';}else if(ieoa>=0.66){b='b-warn';bt='Orta PPM';}else{b='b-danger';bt='Ciddi PPM';}
+        interp='Aortik, BMI <30: >0.85cm²/m² PPM yok · 0.66–0.85cm²/m² Orta · ≤0.65 cm²/m² Ciddi';
+      }else{
+        if(ieoa>0.70){b='b-good';bt='PPM yok';}else if(ieoa>=0.56){b='b-warn';bt='Orta PPM';}else{b='b-danger';bt='Ciddi PPM';}
+        interp='Aortik, BMI ≥30: >0.70cm²/m² PPM yok · 0.56–0.70cm²/m² Orta PPM · ≤0.55 cm²/m² Ciddi PPM';
+      }
+    }else{
+      if(bmi==='lo'){
+        if(ieoa>1.20){b='b-good';bt='PPM yok';}else if(ieoa>=0.91){b='b-warn';bt='Orta PPM';}else{b='b-danger';bt='Ciddi PPM';}
+        interp='Mitral, BMI <30 kg/m²: >1.20 cm²/m² PPM yok · 0.91–1.20 cm²/m² Orta PPM · ≤0.90 cm²/m² Ciddi PPM';
+      }else{
+        if(ieoa>1.00){b='b-good';bt='PPM yok';}else if(ieoa>=0.76){b='b-warn';bt='Orta PPM';}else{b='b-danger';bt='Ciddi PPM';}
+        interp='Mitral, BMI ≥30 kg/m²: >1.00 cm²/m² PPM yok · 0.76–1.00 cm²/m² Orta PPM · ≤0.75 cm²/m² Ciddi PPM';
+      }
+    }
+    return out(fmt(ieoa,2),'cm²/m²',`${pos==='ao'?'Aortik':'Mitral'} pozisyon · ${interp}`,b,bt);}});
+
+add("prosthesis",{id:"dvi_prosth",title:"Protez DVI (Aortik)",sub:"Protez aort kapak fonksiyonu",
+  formula:"DVI = LVOT_VTI / Protez_VTI",
+  fields:[["pdvi_lvot","LVOT VTI","cm","20"],["pdvi_av","Protez transvalvüler VTI","cm","60"]],
+  note:"DVI; pik hız, ortalama gradiyent, hız oranı ve kapak morfolojisi ile birlikte değerlendirilmelidir.",
+  compute(){const l=num('pdvi_lvot'),a=num('pdvi_av');if(l==null||a==null)return ph;
+    const dvi=l/a;let b,bt;
+    if(dvi>=0.35){b='b-good';bt='Normal protez fonksiyonu';}else if(dvi>=0.25){b='b-warn';bt='Olası protez obstrüksiyonu';}else{b='b-danger';bt='Belirgin protez obstrüksiyonu';}
+    return out(fmt(dvi,2),'','≥0.35: Normal · 0.25–0.34: Olası obstrüksiyon · <0.25: Obstrüksiyon',b,bt);}});
+
+/* ---------- RV additions ---------- */
+add("rv",{id:"rap",title:"Sağ Atriyum Basıncı (RAP)",sub:"IVC çapı & inspiratuar kollaps ile tahmin",
+  formula:"IVC ≤2.1 cm & >%50 kollaps → 3 mmHg ; >2.1 cm & <%50 → 15 mmHg ; ara → 8 mmHg",
+  fields:[["ivc_d","IVC çapı","cm","1.8"],["ivc_coll","İnspiratuar kollaps","sel","1|>%50 (sniff ile);0|<%50"]],
+  compute(){const d=num('ivc_d'),coll=$('ivc_coll').value;if(d==null)return ph;
+    let rap,b,bt;
+    if(d<=2.1 && coll==='1'){rap=3;b='b-good';bt='Normal (0–5)';}
+    else if(d>2.1 && coll==='0'){rap=15;b='b-danger';bt='Yüksek (10–20)';}
+    else{rap=8;b='b-warn';bt='Ara (5–10)';}
+    return out(rap,'mmHg',`IVC ${fmt(d,1)} cm · sPAP hesabında RAP olarak kullanılabilir`,b,bt);}});
+
+add("rv",{id:"spap",title:"Sistolik PAB (sPAP / PASP)",sub:"Ekokardiyografik tahmin (TR jeti)",
+  formula:"sPAP = 4 × TRV² + RAP",
+  fields:[["spap_trv","Pik TR jet hızı (TRV)","m/s","2.8"],["spap_rap","RAP","mmHg","8"]],
+  compute(){const trv=num('spap_trv'),rap=num('spap_rap');if(trv==null||rap==null)return ph;
+    const spap=4*trv*trv+rap;let b,bt;
+    if(spap<=35){b='b-good';bt='Normal tahmini sPAP';}else{b='b-danger';bt='PH olasılığı artmış';}
+    return out(fmt(spap,0),'mmHg','≤35 mmHg: Normal tahmini sPAP · >35 mmHg: PH olasılığı artmış (TRV ve diğer eko bulguları ile birlikte)',b,bt);}});
+
+add("rv",{id:"mpap",title:"Ortalama PAB (mPAP)",sub:"Ekokardiyografik tahmin (PR jeti / sPAP)",
+  formula:"mPAP ≈ 4×(PR erken diyastolik jet hızı)² + RAP  ·  (alternatif: 0.61×sPAP + 2)",
+  fields:[["mpap_mode","Yöntem","sel","pr|PR erken diyastolik jet hızı;sp|sPAP'tan tahmin"],["mpap_v","Değer (PR hızı m/s veya sPAP mmHg)","","2.2"],["mpap_rap","RAP","mmHg","8"]],
+  compute(){const mode=$('mpap_mode').value,v=num('mpap_v'),rap=num('mpap_rap');
+    if(v==null)return ph;let mpap;
+    if(mode==='pr'){mpap=4*v*v+(rap||0);}else{mpap=0.61*v+2;}
+    let b,bt;if(mpap<=20){b='b-good';bt='Normal mPAP';}else{b='b-danger';bt='Yüksek mPAP / ileri değerlendirme önerilir';}
+    return out(fmt(mpap,0),'mmHg','2022 ESC/ERS: PH tanımı mPAP >20 mmHg; PVR ile birlikte değerlendirilir · ≤20: Normal · >20: Yüksek',b,bt);}});
+
+add("rv",{id:"dpap",title:"Diyastolik PAB (dPAP)",sub:"Ekokardiyografik tahmin (PR jeti)",
+  formula:"dPAP = 4 × (PR end-diyastolik jet hızı)² + RAP",
+  fields:[["dpap_v","PR end-diyastolik jet hızı","m/s","1.5"],["dpap_rap","RAP","mmHg","8"]],
+  compute(){const v=num('dpap_v'),rap=num('dpap_rap');if(v==null||rap==null)return ph;
+    const dpap=4*v*v+rap;return out(fmt(dpap,0),'mmHg','PA komplians ve DPG hesabında kullanılır','b-neutral','dPAP');}});
+
+add("rv",{id:"rvsp",title:"RV Stroke Volume Değerlendirme ",sub:"",
+  formula:"RVSV = 0.785 × (RVOT çapı)² × RVOT VTI",
+  fields:[["rvsp_d","RVOT çapı","cm","2.4"],["rvsp_vti","RVOT VTI","cm","16"]],
+  compute(){const d=num('rvsp_d'),vti=num('rvsp_vti');if(d==null||vti==null)return ph;
+    const area=0.785*d*d;const sv=area*vti;let b,bt;
+    if(vti<9.5){b='b-danger';bt='Düşük (RVOT VTI<9.5)';}else{b='b-good';bt='';}
+    return out(fmt(sv,1),'mL',``,b,bt);}});
+
+/* ---------- PERICARDIUM ---------- */
+add("pericard",{id:"effusion",title:"Perikardiyal Efüzyon Kantifikasyonu",sub:"",
+  formula:"Hafif <10 mm · Orta 10–20 mm · Geniş >20 mm (end-diyastolde)",
+  fields:[["eff_mm","Maksimum diyastolik efüzyon mesafesi","mm","8"]],
+  compute(){const v=num('eff_mm');if(v==null)return ph;let b,bt,vol;
+    if(v<10){b='b-good';bt='Hafif';vol='~<300 mL';}else if(v<=20){b='b-warn';bt='Orta';vol='~300–500 mL';}else{b='b-danger';bt='Geniş';vol='~>500 mL';}
+    return out(fmt(v,0),'mm',`Efüzyon boyutu tek başına kardiyak tamponadı göstermez. Klinik ve ekokardiyografik tamponad bulguları birlikte değerlendirilmelidir`,b,bt);}});
+
+add("pericard",{id:"tamponade",title:"Tamponad Fizyolojisi — Solunumsal Değişim",sub:"Transmitral/triküspit doluş akımının solunumsal varyasyonu",
+  formula:"Mitral E %değişim = (Emax−Emin)/Emax×100 ; Triküspit E %değişim = (Emax−Emin)/Emin×100",
+  fields:[["tamp_mit_max","Transmitral E (ekspiryum)","cm/s","85"],["tamp_mit_min","Transmitral E (inspiryum)","cm/s","68"],["tamp_tri_max","Transtriküspit E (inspiryum)","cm/s","60"],["tamp_tri_min","Transtriküspit E (ekspiryum)","cm/s","40"]],
+  compute(){const mx=num('tamp_mit_max'),mn=num('tamp_mit_min'),tmx=num('tamp_tri_max'),tmn=num('tamp_tri_min');if(mx==null||mn==null&&(tmx==null||tmn==null))return ph;
+    let html='';
+    // Mitral
+    if(mx!=null&&mn!=null){
+      if(mx<mn)return '<span class="placeholder">mitral maks ≥ min olmalı</span>';
+      const mitChg=(mx-mn)/mx*100;
+      let b,bt;
+      if(mitChg>25){b='b-danger';bt='Tamponad fizyolojisi lehine';}
+      else{b='b-good';bt='Belirgin varyasyon yok';}
+      html+=`<div class="val">Mitral: ${fmt(mitChg,0)}<small> %</small></div>`+
+        `<div class="interp">Mitral E dalga varyasyonu >%25 → Tamponad fizyolojisi lehine</div>`+
+        badge(bt,b);
+    }
+    // Triküspit
+    if(tmx!=null&&tmn!=null){
+      if(tmx<tmn)return '<span class="placeholder">triküspit maks ≥ min olmalı</span>';
+      const triChg=(tmx-tmn)/tmn*100;
+      let b,bt;
+      if(triChg>40){b='b-danger';bt='Tamponad fizyolojisi lehine';}
+      else{b='b-good';bt='Belirgin varyasyon yok';}
+      html+=`<div class="val" style="margin-top:8px">Triküspit: ${fmt(triChg,0)}<small> %</small></div>`+
+        `<div class="interp">Triküspit E dalga varyasyonu >%40 → Tamponad fizyolojisi lehine</div>`+
+        badge(bt,b);
+    }
+    return html||ph;}});
+
+/* ============ render ============ */
+function fieldHTML(f){
+  const [id,label,unit,def]=f;
+  if(unit==='sel'){
+    const opts=def.split(';').map(o=>{const [v,t]=o.split('|');return `<option value="${v}">${t}</option>`;}).join('');
+    return `<div class="field"><label for="${id}">${label}</label><div class="row"><select id="${id}" aria-label="${label}">${opts}</select></div></div>`;
+  }
+  if(unit==='multi'){
+    const opts=def.split(';').map(o=>{const [v,t]=o.split('|');return `<option value="${v}">${t}</option>`;}).join('');
+    return `<div class="field"><label for="${id}">${label} <small>(çoklu seçim)</small></label><div class="row"><select id="${id}" multiple size="3" aria-label="${label}">${opts}</select></div></div>`;
+  }
+  return `<div class="field"><label for="${id}">${label}</label><div class="row"><input type="number" step="any" inputmode="decimal" id="${id}" value="${def||''}" placeholder="${def||''}" aria-label="${label}"><span class="unit">${unit}</span></div></div>`;
+}
+function cardHTML(c){
+  const half=c.fields.length>=4 && c.fields.every(f=>f[2]!=='sel'&&f[2]!=='multi');
+  let fields;
+  if(half){
+    let h='';for(let i=0;i<c.fields.length;i+=2){
+      h+='<div class="two">'+fieldHTML(c.fields[i])+(c.fields[i+1]?fieldHTML(c.fields[i+1]):'')+'</div>';
+    }fields=h;
+  }else fields=c.fields.map(fieldHTML).join('');
+  return `<div class="card" data-search="${(c.title+' '+c.sub+' '+c.id).toLowerCase()}" id="card-${c.id}">
+    <h3>${c.title}</h3><div class="sub">${c.sub}</div>
+    <div class="formula">${c.formula}</div>
+    ${fields}
+    <div class="result" id="res-${c.id}">${ph}</div>
+    ${c.note?`<div class="note">${c.note}</div>`:''}
+  </div>`;
+}
+let content='',toc='<h4>Hesaplayıcı Grupları</h4>';
+CATS.forEach(cat=>{
+  if(!cat.calcs.length)return;
+  toc+=`<a class="toc-section-link" href="#sec-${cat.key}" data-open-section="${cat.key}">${cat.name}<span>${cat.calcs.length}</span></a>`;
+  content+=`<section class="calc-section collapsed" id="sec-${cat.key}-wrap" data-section="${cat.key}">
+    <button type="button" class="section-title" id="sec-${cat.key}" aria-expanded="false" aria-controls="grid-${cat.key}">
+      <span class="left">${cat.name}</span><span class="count">${cat.calcs.length} hesaplayıcı</span><span class="chev">⌄</span>
+    </button>
+    <div class="grid accordion-panel" id="grid-${cat.key}" hidden>`;
+  cat.calcs.forEach(c=>content+=cardHTML(c));
+  content+='</div></section>';
+});
+$('content').innerHTML=content;
+$('toc').innerHTML=toc;
+
+function setSectionOpen(section, open){
+  const btn=section.querySelector('.section-title');
+  const panel=section.querySelector('.accordion-panel');
+  section.classList.toggle('collapsed', !open);
+  if(panel) panel.hidden=!open;
+  if(btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+document.querySelectorAll('.calc-section .section-title').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const section=btn.closest('.calc-section');
+    setSectionOpen(section, section.classList.contains('collapsed'));
+  });
+});
+document.querySelectorAll('[data-open-section]').forEach(link=>{
+  link.addEventListener('click',e=>{
+    const key=link.dataset.openSection;
+    const section=$(`sec-${key}-wrap`);
+    if(section){setSectionOpen(section,true);}
+  });
+});
+
+/* attach listeners */
+const allCalcs=[];CATS.forEach(c=>c.calcs.forEach(x=>allCalcs.push(x)));
+function recompute(){allCalcs.forEach(c=>{try{setRes('res-'+c.id,c.compute());}catch(e){setRes('res-'+c.id,'<span class="placeholder">Giriş hatası</span>');}});}
+document.querySelectorAll('input[type=number],select').forEach(el=>{
+  el.addEventListener('input',recompute);
+  el.addEventListener('change',recompute);
+});
+recompute();
+
+/* search filter */
+$('searchBox').addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase().trim();
+  document.querySelectorAll('.toc-section-link').forEach(a=>a.classList.remove('active'));
+  document.querySelectorAll('.calc-section').forEach(section=>{
+    let anyVisible=false;
+    section.querySelectorAll('.card').forEach(card=>{
+      const match=!q||card.dataset.search.includes(q);
+      card.classList.toggle('hidden',!match);
+      if(match) anyVisible=true;
+    });
+    section.classList.toggle('hidden',!anyVisible);
+    if(q && anyVisible){
+      setSectionOpen(section,true);
+      const key=section.dataset.section;
+      const nav=document.querySelector(`[data-open-section="${key}"]`);
+      if(nav)nav.classList.add('active');
+    }
+  });
+});
+
+/* ============ Kısaltmalar ============ */
+const ABBRS=[
+  ["AD","Aort darlığı (aort stenozu)"],
+  ["AR","Aort yetersizliği (aortic regurgitation)"],
+  ["ASE","American Society of Echocardiography"],
+  ["AV","Aort kapak (aortic valve)"],
+  ["AVA","Aort kapak alanı (aortic valve area)"],
+  ["AVAi","İndekslenmiş aort kapak alanı"],
+  ["BSA","Vücut yüzey alanı (body surface area)"],
+  ["BMI","Beden kütle indeksi (body mass index)"],
+  ["CI","Kalp indeksi (cardiac index)"],
+  ["CO","Kalp debisi (cardiac output)"],
+  ["D1","Septuma paralel LV çapı"],
+  ["D2","Septuma dik LV çapı"],
+  ["DBP","Diyastolik kan basıncı (diastolic blood pressure)"],
+  ["dPAP","Diyastolik pulmoner arter basıncı"],
+  ["DPG","Diyastolik basınç gradiyenti (diastolic pressure gradient)"],
+  ["DSE","Dobutamin stres ekokardiyografi"],
+  ["DVI","Boyutsuzluk indeksi (dimensionless index)"],
+  ["E","Erken diyastolik mitral doluş hızı"],
+  ["A","Geç (atriyal) diyastolik mitral doluş hızı"],
+  ["e′","Mitral anüler erken diyastolik doku hızı (TDI)"],
+  ["s′","Mitral anüler sistolik doku hızı (TDI)"],
+  ["EaPA","Pulmoner arter elastansı (pulmonary artery elastance)"],
+  ["EDA","End-diyastolik alan (end-diastolic area)"],
+  ["EF","Ejeksiyon fraksiyonu (ejection fraction)"],
+  ["EI","Eksantriklik indeksi (eccentricity index)"],
+  ["ELI","Enerji kaybı indeksi (energy loss index)"],
+  ["EOA","Efektif orifis alanı (effective orifice area)"],
+  ["EROA","Efektif regürjitan orifis alanı"],
+  ["ESA","End-sistolik alan (end-systolic area)"],
+  ["ESC/ERS","Avrupa Kardiyoloji / Solunum Dernekleri"],
+  ["ET","Ejeksiyon zamanı (ejection time)"],
+  ["FAC","Fraksiyonel alan değişimi (fractional area change)"],
+  ["FS","Fraksiyonel kısalma (fractional shortening)"],
+  ["GFR / eGFR","(Tahmini) glomerüler filtrasyon hızı"],
+  ["GLS","Global longitudinal strain"],
+  ["HFmrEF","Orta derecede azalmış EF'li kalp yetersizliği"],
+  ["HFpEF","Korunmuş EF'li kalp yetersizliği"],
+  ["HFrEF","Azalmış EF'li kalp yetersizliği"],
+  ["HR","Kalp hızı (heart rate)"],
+  ["IVCT","İzovolümetrik kontraksiyon zamanı"],
+  ["IVRT","İzovolümetrik gevşeme zamanı"],
+  ["IVC","İnferior vena kava"],
+  ["IVSd","İnterventriküler septum diyastolik kalınlığı"],
+  ["LA","Sol atriyum (left atrium)"],
+  ["LAP","Sol atriyum basıncı (left atrial pressure)"],
+  ["LARS","Sol atriyal rezervuar strain"],
+  ["LAVi","Sol atriyal volüm indeksi"],
+  ["LV","Sol ventrikül (left ventricle)"],
+  ["LVEDD","Sol ventrikül end-diyastolik çapı"],
+  ["LVEDV","Sol ventrikül end-diyastolik volümü"],
+  ["LVEF","Sol ventrikül ejeksiyon fraksiyonu"],
+  ["LVESD","Sol ventrikül end-sistolik çapı"],
+  ["LVESV","Sol ventrikül end-sistolik volümü"],
+  ["LVM","Sol ventrikül kütlesi (LV mass)"],
+  ["LVMI","Sol ventrikül kütle indeksi"],
+  ["LVOT","Sol ventrikül çıkış yolu (LV outflow tract)"],
+  ["MAP","Ortalama arteryel basınç (mean arterial pressure)"],
+  ["MAPSE","Mitral anüler düzlem sistolik hareketi"],
+  ["mPAP","Ortalama pulmoner arter basıncı"],
+  ["MPI","Miyokardiyal performans indeksi (Tei indeksi)"],
+  ["MR","Mitral yetersizlik (mitral regurgitation)"],
+  ["MS","Mitral darlık (mitral stenoz)"],
+  ["MV","Mitral kapak (mitral valve)"],
+  ["MVA","Mitral kapak alanı (mitral valve area)"],
+  ["NYHA","New York Heart Association fonksiyonel sınıf"],
+  ["PAB / PAP","Pulmoner arter basıncı"],
+  ["PAC","Pulmoner arter komplians"],
+  ["PASCAL","PFO-İlişkili İnme Nedensellik Olasılığı sınıflaması"],
+  ["PASP / sPAP","Sistolik pulmoner arter basıncı"],
+  ["PCWP","Pulmoner kapiller kama basıncı (wedge)"],
+  ["PFO","Patent foramen ovale"],
+  ["PH","Pulmoner hipertansiyon"],
+  ["PHT","Basınç yarılanma zamanı (pressure half-time)"],
+  ["PISA","Proksimal izovelosite yüzey alanı"],
+  ["PMBV","Perkütan mitral balon valvülotomi"],
+  ["PPM","Protez–hasta uyumsuzluğu (prosthesis–patient mismatch)"],
+  ["PR","Pulmoner yetersizlik (pulmonary regurgitation)"],
+  ["PSAX","Parasternal kısa eksen"],
+  ["PVR","Pulmoner vasküler direnç"],
+  ["PWd","Posterior duvar diyastolik kalınlığı"],
+  ["Qp/Qs","Pulmoner/sistemik akım oranı (şant oranı)"],
+  ["RAP","Sağ atriyum basıncı"],
+  ["RF","Regürjitan fraksiyon"],
+  ["RoPE","Risk of Paradoxical Embolism skoru"],
+  ["R Vol","Regürjitan volüm"],
+  ["RV","Sağ ventrikül (right ventricle)"],
+  ["RVAC","RV–pulmoner arter kuplajı (coupling)"],
+  ["RVFWLS / RVFWS","RV serbest duvar longitudinal strain"],
+  ["RVOT","Sağ ventrikül çıkış yolu"],
+  ["RWT","Bağıl duvar kalınlığı (relative wall thickness)"],
+  ["SBP","Sistolik kan basıncı (systolic blood pressure)"],
+  ["SV","Atım hacmi (stroke volume)"],
+  ["SVi","İndekslenmiş atım hacmi (stroke volume index)"],
+  ["TAPSE","Triküspit anüler düzlem sistolik hareketi"],
+  ["TDI","Doku Doppler görüntüleme (tissue Doppler imaging)"],
+  ["Tei","Tei (miyokardiyal performans) indeksi"],
+  ["TIA","Geçici iskemik atak (transient ischemic attack)"],
+  ["TPG","Transpulmoner gradiyent"],
+  ["TR","Triküspit yetersizlik (tricuspid regurgitation)"],
+  ["TRISCORE","İzole triküspit cerrahisi risk skoru"],
+  ["TRV","Triküspit regürjitan jet pik hızı"],
+  ["ÜLN","Normal üst sınır (upper limit of normal)"],
+  ["Vmax","Pik transvalvüler hız"],
+  ["VTI","Hız-zaman integrali (velocity–time integral)"],
+  ["Zva","Valvüloarteryel impedans"],
+];
+(function initAbbr(){
+  const body=$('abbrBody');
+  body.innerHTML=ABBRS.map(([k,v])=>`<div class="abbr-row" data-k="${(k+' '+v).toLowerCase()}"><div class="abbr-key">${k}</div><div class="abbr-val">${v}</div></div>`).join('')+'<div class="abbr-empty" id="abbrEmpty" style="display:none">Eşleşen kısaltma yok.</div>';
+  const overlay=$('abbrOverlay'),search=$('abbrSearch');
+  function open(){overlay.classList.add('open');search.value='';filter('');setTimeout(()=>search.focus(),50);}
+  function close(){overlay.classList.remove('open');}
+  function filter(q){q=q.toLowerCase().trim();let any=false;
+    body.querySelectorAll('.abbr-row').forEach(r=>{const m=!q||r.dataset.k.includes(q);r.classList.toggle('hidden',!m);if(m)any=true;});
+    $('abbrEmpty').style.display=any?'none':'block';}
+  $('abbrBtn').addEventListener('click',open);
+  $('abbrClose').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('open'))close();});
+  search.addEventListener('input',e=>filter(e.target.value));
+})();
+</script>
+</body>
+</html>
